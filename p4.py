@@ -250,6 +250,7 @@ y_train = np.ravel(y_train)
 # MSE Modelo Lasso (test) : 0.0837
 
 
+
 # Random Forest.
 
 # from sklearn.ensemble import RandomForestRegressor
@@ -410,3 +411,60 @@ plt.figure(figsize=(10,10))
 plt.barh(range(X_train.shape[1]),importances[indices])
 plt.yticks(range(X_train.shape[1]),feature_names[indices])
 plt.show()
+
+
+# best mean cross-validation score: 0.971
+# best parameters: {'max_depth': 14}
+# Train:  0.9917810945166325
+# Test:  0.9775840612708647
+
+
+
+
+
+
+# Los resultados con el modelo Lasso no son muy buenos pero la diferencia entre el MSE de train y el MSE de test son pequeños lo que quiere decir que está generalizando bien.
+# Con Random Forest vemos que a medida que seleccionamos características los resultados van mejorando, podemos volver a probar Lasso para ver si mejora con un modelo simplificado.
+# Podemos buscar también generar nuevas características a partir de los datos que nos proporciona Random Forest, una combinación lineal de características.
+
+
+# Lasso.
+
+from sklearn.model_selection import GridSearchCV
+from sklearn.linear_model import Lasso
+
+alpha_vector = np.logspace(-1,10,20)
+param_grid = {'alpha': alpha_vector }
+grid = GridSearchCV(Lasso(), scoring= 'neg_mean_squared_error', param_grid=param_grid, cv = 3, verbose=2)
+grid.fit(XtrainScaled, y_train)
+print("best mean cross-validation score: {:.3f}".format(grid.best_score_))
+print("best parameters: {}".format(grid.best_params_))
+
+#-1 porque es negado
+scores = -1*np.array(grid.cv_results_['mean_test_score'])
+plt.semilogx(alpha_vector,scores,'-o')
+plt.xlabel('alpha',fontsize=16)
+plt.ylabel('3-Fold MSE')
+plt.show()
+
+from sklearn.metrics import mean_squared_error
+
+alpha_optimo = grid.best_params_['alpha']
+lasso = Lasso(alpha = alpha_optimo).fit(XtrainScaled,y_train)
+
+ytrainLasso = lasso.predict(XtrainScaled)
+ytestLasso  = lasso.predict(XtestScaled)
+mseTrainModelLasso = mean_squared_error(y_train,ytrainLasso)
+mseTestModelLasso = mean_squared_error(y_test,ytestLasso)
+
+print('MSE Modelo Lasso (train): %0.3g' % mseTrainModelLasso)
+print('MSE Modelo Lasso (test) : %0.3g' % mseTestModelLasso)
+
+print('RMSE Modelo Lasso (train): %0.3g' % np.sqrt(mseTrainModelLasso))
+print('RMSE Modelo Lasso (test) : %0.3g' % np.sqrt(mseTestModelLasso))
+
+feature_names = data.columns[1:]
+
+w = lasso.coef_
+for f,wi in zip(feature_names,w):
+    print(f,wi)
