@@ -99,7 +99,6 @@ data = data.drop(columns=columns_to_drop, axis=1)
 
 # Generamos nuevas características
 data['Bathroom_Bedrooms'] = data['Bathrooms'] * data['Bedrooms']
-data['Total_Price'] = data['Price'] - data['Cleaning Fee']
 
 # print(data_madrid.info())
 # print(data_madrid.head())
@@ -157,7 +156,6 @@ data_test = data_test.drop(columns=columns_to_drop, axis=1)
 
 # Generamos nuevas características
 data_test['Bathroom_Bedrooms'] = data_test['Bathrooms'] * data_test['Bedrooms']
-data_test['Total_Price'] = data_test['Price'] - data_test['Cleaning Fee']
 
 print(data_test.info())
 print(data_test.head())
@@ -239,22 +237,27 @@ w = lasso.coef_
 for f,wi in zip(feature_names,w):
     print(f,wi)
 
-
-
-y_train = np.ravel(y_train)
-
-
-# best mean cross-validation score: -0.083
+# best mean cross-validation score: -0.183
 # best parameters: {'alpha': 0.1}
-# MSE Modelo Lasso (train): 0.0826
-# MSE Modelo Lasso (test) : 0.0837
+# MSE Modelo Lasso (train): 0.183
+# MSE Modelo Lasso (test) : 0.177
+# RMSE Modelo Lasso (train): 0.427
+# RMSE Modelo Lasso (test) : 0.42
 
+
+# Este modelo nos dice que las variables más relevantes son Room Type, Bedrooms, Neighbourhood Group Cleansed,Cleaning Fee,Bathroom_Bedrooms.
+
+# Generamos una nueva característica
+data['Room_Type_Bedrooms'] = data['Room Type'] * data['Bedrooms']
+data_test['Room_Type_Bedrooms'] = data_test['Room Type'] * data_test['Bedrooms']
 
 
 # Random Forest.
 
 # from sklearn.ensemble import RandomForestRegressor
 
+
+# y_train = np.ravel(y_train)
 # maxDepth = range(1,15)
 # tuned_parameters = {'max_depth': maxDepth}
 
@@ -290,76 +293,15 @@ y_train = np.ravel(y_train)
 # plt.yticks(range(X_train.shape[1]),feature_names[indices])
 # plt.show()
 
-
-# best mean cross-validation score: 0.957
+# best mean cross-validation score: 0.746
 # best parameters: {'max_depth': 14}
-# Train:  0.9864390825303366
-# Test:  0.9658948114887358
+# Train:  0.8727981241224567
+# Test:  0.7849075560856553
 
 # Selección de características, eliminamos variables con menos relevancia.
 data = data.drop(['Host Response Time','Bed Type'] , axis = 1)
 data_test = data_test.drop(['Host Response Time','Bed Type'], axis = 1)
 
-# # Dataset de train
-# data_train = data.values
-# y_train = data_train[:,0:1]     
-# X_train = data_train[:,1:]      
-
-# # Dataset de test
-# data_test_val = data_test.values
-# y_test = data_test_val[:,0:1]     
-# X_test = data_test_val[:,1:]  
-
-# y_train = np.ravel(y_train)
-
-
-# from sklearn.ensemble import RandomForestRegressor
-
-# maxDepth = range(1,15)
-# tuned_parameters = {'max_depth': maxDepth}
-
-# grid = GridSearchCV(RandomForestRegressor(random_state=0, n_estimators=200, max_features='sqrt'), param_grid=tuned_parameters,cv=3, verbose=2) 
-# grid.fit(X_train, y_train)
-
-# print("best mean cross-validation score: {:.3f}".format(grid.best_score_))
-# print("best parameters: {}".format(grid.best_params_))
-
-# scores = np.array(grid.cv_results_['mean_test_score'])
-# plt.plot(maxDepth,scores,'-o')
-# plt.xlabel('max_depth')
-# plt.ylabel('10-fold ACC')
-
-# plt.show()
-
-
-# maxDepthOptimo = grid.best_params_['max_depth']
-# randomForest = RandomForestRegressor(max_depth=maxDepthOptimo,n_estimators=200,max_features='sqrt').fit(X_train,y_train)
-
-# print("Train: ",randomForest.score(X_train,y_train))
-# print("Test: ",randomForest.score(X_test,y_test))
-
-
-
-# importances = randomForest.feature_importances_
-# importances = importances / np.max(importances)
-
-# indices = np.argsort(importances)[::-1]
-
-# plt.figure(figsize=(10,10))
-# plt.barh(range(X_train.shape[1]),importances[indices])
-# plt.yticks(range(X_train.shape[1]),feature_names[indices])
-# plt.show()
-
-
-# best mean cross-validation score: 0.965
-# best parameters: {'max_depth': 14}
-# Train:  0.9894272018438717
-# Test:  0.9718694774945399
-
-
-# Selección de características, eliminamos variables con menos relevancia.
-data = data.drop(['Number of Reviews','Neighbourhood Group Cleansed'] , axis = 1)
-data_test = data_test.drop(['Number of Reviews','Neighbourhood Group Cleansed'], axis = 1)
 
 
 # Dataset de train
@@ -370,13 +312,13 @@ X_train = data_train[:,1:]
 # Dataset de test
 data_test_val = data_test.values
 y_test = data_test_val[:,0:1]     
-X_test = data_test_val[:,1:]  
+X_test = data_test_val[:,1:]      
 
-y_train = np.ravel(y_train)
-
-
+from sklearn.model_selection import GridSearchCV
 from sklearn.ensemble import RandomForestRegressor
 
+
+y_train = np.ravel(y_train)
 maxDepth = range(1,15)
 tuned_parameters = {'max_depth': maxDepth}
 
@@ -413,12 +355,10 @@ plt.yticks(range(X_train.shape[1]),feature_names[indices])
 plt.show()
 
 
-# best mean cross-validation score: 0.971
+# best mean cross-validation score: 0.745
 # best parameters: {'max_depth': 14}
-# Train:  0.9917810945166325
-# Test:  0.9775840612708647
-
-
+# Train:  0.8703200610730477
+# Test:  0.7825764588362943
 
 
 
@@ -426,45 +366,3 @@ plt.show()
 # Los resultados con el modelo Lasso no son muy buenos pero la diferencia entre el MSE de train y el MSE de test son pequeños lo que quiere decir que está generalizando bien.
 # Con Random Forest vemos que a medida que seleccionamos características los resultados van mejorando, podemos volver a probar Lasso para ver si mejora con un modelo simplificado.
 # Podemos buscar también generar nuevas características a partir de los datos que nos proporciona Random Forest, una combinación lineal de características.
-
-
-# Lasso.
-
-from sklearn.model_selection import GridSearchCV
-from sklearn.linear_model import Lasso
-
-alpha_vector = np.logspace(-1,10,20)
-param_grid = {'alpha': alpha_vector }
-grid = GridSearchCV(Lasso(), scoring= 'neg_mean_squared_error', param_grid=param_grid, cv = 3, verbose=2)
-grid.fit(XtrainScaled, y_train)
-print("best mean cross-validation score: {:.3f}".format(grid.best_score_))
-print("best parameters: {}".format(grid.best_params_))
-
-#-1 porque es negado
-scores = -1*np.array(grid.cv_results_['mean_test_score'])
-plt.semilogx(alpha_vector,scores,'-o')
-plt.xlabel('alpha',fontsize=16)
-plt.ylabel('3-Fold MSE')
-plt.show()
-
-from sklearn.metrics import mean_squared_error
-
-alpha_optimo = grid.best_params_['alpha']
-lasso = Lasso(alpha = alpha_optimo).fit(XtrainScaled,y_train)
-
-ytrainLasso = lasso.predict(XtrainScaled)
-ytestLasso  = lasso.predict(XtestScaled)
-mseTrainModelLasso = mean_squared_error(y_train,ytrainLasso)
-mseTestModelLasso = mean_squared_error(y_test,ytestLasso)
-
-print('MSE Modelo Lasso (train): %0.3g' % mseTrainModelLasso)
-print('MSE Modelo Lasso (test) : %0.3g' % mseTestModelLasso)
-
-print('RMSE Modelo Lasso (train): %0.3g' % np.sqrt(mseTrainModelLasso))
-print('RMSE Modelo Lasso (test) : %0.3g' % np.sqrt(mseTestModelLasso))
-
-feature_names = data.columns[1:]
-
-w = lasso.coef_
-for f,wi in zip(feature_names,w):
-    print(f,wi)
