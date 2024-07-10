@@ -17,10 +17,6 @@ data = pd.read_csv('C:\\Users\\guill\\OneDrive\\Desktop\\pr_ml\\data\\train.csv'
 # print(data.info())
 print(data.isnull().any())
 
-
-print(f"Cantidad de registros antes del filtrado: {len(data)}")
-print(f"Cantidad de registros después del filtrado: {len(data)}")
-
 # Calculamos la cantidad de valores nulos en cada columna.
 null_counts = data.isnull().sum()
 print("Cantidad de valores nulos por columna:")
@@ -30,7 +26,6 @@ print(null_counts)
 data = data.drop(['Host Acceptance Rate','Square Feet','Has Availability','License','Jurisdiction Names'], axis=1)
 
 #Eliminamos registros que no tengan sentido como apartamentos sin baño, precio o camas.
-
 filtro1 = data['Bathrooms'] > 0
 filtro2 = data['Price'] > 0
 filtro3 = data['Beds'] > 0
@@ -113,7 +108,6 @@ for col in columnas_verificacion:
 
 
 #Eliminación outliers
-
 data_madrid = data_madrid[data_madrid['Bedrooms'] <= 8]
 data_madrid = data_madrid[data_madrid['Bathrooms'] <= 6]
 data_madrid = data_madrid[data_madrid['Cleaning Fee'] <= 300]
@@ -121,7 +115,6 @@ data_madrid = data_madrid[data_madrid['Reviews per Month'] <= 12.5]
 
 
 # Ahora tenemos todas las columnas con valores númericos y podemos ver la correlación que tienen.
-
 corr = np.abs(data_madrid.drop(['Log_Price'], axis=1).corr())
 mask = np.zeros_like(corr, dtype=bool)
 mask[np.triu_indices_from(mask)] = True
@@ -132,14 +125,13 @@ plt.show()
 
 
 # De aquí podemos sacar que no necesitamos las siguientes columnas.
-
 data_madrid = data_madrid.drop(['Availability 30','Availability 60','Availability 90','Review Scores Accuracy', 'Review Scores Cleanliness', 'Review Scores Checkin',
                                 'Review Scores Communication','Review Scores Location','Review Scores Value','Accommodates','Neighbourhood Cleansed'], axis=1)
 
 
 # Generamos nuevas características.
-data_madrid['Bathroom_Bedrooms'] = data_madrid['Bathrooms'] * data_madrid['Bedrooms']
-data_madrid['Total_Price'] = data_madrid['Price'] - data_madrid['Cleaning Fee']
+data_madrid['Bathrooms_Bedrooms'] = data_madrid['Bathrooms'] * data_madrid['Bedrooms']
+data_madrid['Beds_Bedrooms_Ratio'] = data_madrid['Beds'] / data_madrid['Bedrooms']
 
 # print(data_madrid.shape)
 

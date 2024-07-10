@@ -100,8 +100,9 @@ data = data.drop(columns=columns_to_drop, axis=1)
 # Generamos nuevas características
 data['Bathroom_Bedrooms'] = data['Bathrooms'] * data['Bedrooms']
 
-# print(data_madrid.info())
-# print(data_madrid.head())
+
+# print(data.info())
+# print(data.head())
 
 
 #test
@@ -363,6 +364,7 @@ plt.show()
 
 
 
-# Los resultados con el modelo Lasso no son muy buenos pero la diferencia entre el MSE de train y el MSE de test son pequeños lo que quiere decir que está generalizando bien.
-# Con Random Forest vemos que a medida que seleccionamos características los resultados van mejorando, podemos volver a probar Lasso para ver si mejora con un modelo simplificado.
-# Podemos buscar también generar nuevas características a partir de los datos que nos proporciona Random Forest, una combinación lineal de características.
+# Los valores de MSE con el modelo Lasso son bajos por lo que tiene que estar haciendo buenas predicciones y la diferencia entre el MSE de train y el MSE de test son pequeños lo que quiere decir que está generalizando bien.
+# Con Random Forest podemos ir haciendo selección de características para ver si los resultados van mejorando, podemos volver a probar Lasso para ver si mejora con un modelo simplificado.
+# Tenemos una diferencia de un 10% entre el train y test y el objetivo sería reducirla.
+# Podemos buscar también generar nuevas características a partir de los datos que nos proporciona Random Forest, una combinación lineal de características. O porbar con nuevos modelos.
